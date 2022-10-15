@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        *{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        html,
+        body{
+            height: 100%;
+        }
+
+        body{
+            background-color: #000;
+        }
+
+        .post_container{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, 300px);
+            gap: 50px 30px;
+            justify-content: center;
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+
+        .img{
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .title{
+            color: #fff;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="post_container"></div>
+
+    <script>
+        const postContainerDOM = document.querySelector('.post_container');
+        let requestURL = 'https://kakechimaru.com/wp-json/wp/v2/posts?_embed'; // WP REST APIのエンドポイント
+        let request = new XMLHttpRequest();
+        request.open('GET', requestURL);
+        request.responseType = 'json';
+        request.send();
+
+        request.addEventListener('load', () => {
+            const superHeroes = request.response;
+            populateHeader(superHeroes, postContainerDOM);
+        });
+
+        function populateHeader(posts, target) { // 取得した記事情報からHTMLを生成
+            console.log(posts);
+            let html = '';
+            posts.forEach(post => {
+                let title = post['title']['rendered'];
+                let link = post['link'];
+                let thumbnail;
+
+                if( post['_embedded']['wp:featuredmedia'][0]['source_url'] ) {
+                    thumbnail = post['_embedded']['wp:featuredmedia'][0]['source_url'];
+                }else{
+                    //
+                }
+
+                html += '<a href="' + link + '" target="_blank">';
+                html += '<img class="img" src="' + thumbnail + '">';
+                html += '<p class="title">' + title + '</p>';
+                html += '</a>';
+            });
+
+            target.insertAdjacentHTML('afterbegin', html); // 生成したHTMLを追加
+        }
+    </script>
+</body>
+
+</html>
